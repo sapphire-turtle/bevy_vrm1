@@ -57,6 +57,9 @@ impl Plugin for VrmaLoaderPlugin {
             default_convert_coordinates: Default::default(),
             extensions,
             default_skinned_mesh_bounds_policy: Default::default(),
+            // Match `GltfPlugin`'s default: VRM meshes stay uncompressed, which
+            // the MToon vertex shader and the expression morphs expect.
+            default_mesh_compression: bevy::mesh::MeshCompressionArgs::none(),
         }));
     }
 }

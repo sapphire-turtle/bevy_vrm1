@@ -107,7 +107,7 @@ pub struct FirstPersonCamera;
 pub struct ThirdPersonCamera;
 
 fn setup_first_person_camera(
-    trigger: On<Add, FirstPersonCamera>,
+    trigger: On<Add<FirstPersonCamera>>,
     mut commands: Commands,
     layers: Res<FirstPersonLayers>,
 ) {
@@ -117,7 +117,7 @@ fn setup_first_person_camera(
 }
 
 fn setup_third_person_camera(
-    trigger: On<Add, ThirdPersonCamera>,
+    trigger: On<Add<ThirdPersonCamera>>,
     mut commands: Commands,
     layers: Res<FirstPersonLayers>,
 ) {

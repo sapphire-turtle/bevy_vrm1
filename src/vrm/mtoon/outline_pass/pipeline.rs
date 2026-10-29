@@ -1,5 +1,5 @@
 use crate::vrm::mtoon::{
-    MTOON_FRAGMENT_SHADER_HANDLE, MTOON_VERTEX_SHADER_HANDLE, MToonMaterial, MToonMaterialKey,
+    MToonMaterial, MToonMaterialKey, mtoon_fragment_shader_path, mtoon_vertex_shader_path,
 };
 use bevy::mesh::MeshVertexBufferLayoutRef;
 use bevy::pbr::{MaterialPipeline, MaterialPipelineKey, MeshPipelineKey};
@@ -14,16 +14,34 @@ use bevy::shader::ShaderDefVal;
 pub(super) struct MToonOutlinePipeline {
     pub base: MaterialPipeline,
     pub material_layout: BindGroupLayoutDescriptor,
+    pub vertex_shader: Handle<Shader>,
+    pub fragment_shader: Handle<Shader>,
+}
+
+impl MToonOutlinePipeline {
+    pub fn new(
+        base: MaterialPipeline,
+        material_layout: BindGroupLayoutDescriptor,
+        asset_server: &AssetServer,
+    ) -> Self {
+        Self {
+            base,
+            material_layout,
+            vertex_shader: asset_server.load(mtoon_vertex_shader_path()),
+            fragment_shader: asset_server.load(mtoon_fragment_shader_path()),
+        }
+    }
 }
 
 impl FromWorld for MToonOutlinePipeline {
     fn from_world(world: &mut World) -> Self {
         let render_device = world.resource::<bevy::render::renderer::RenderDevice>();
         let material_layout = MToonMaterial::bind_group_layout_descriptor(render_device);
-        Self {
-            base: world.resource::<MaterialPipeline>().clone(),
+        Self::new(
+            world.resource::<MaterialPipeline>().clone(),
             material_layout,
-        }
+            world.resource::<AssetServer>(),
+        )
     }
 }
 
@@ -50,9 +68,9 @@ impl SpecializedMeshPipeline for MToonOutlinePipeline {
         };
         MToonMaterial::specialize(&self.base, &mut descriptor, layout, material_key)?;
 
-        descriptor.vertex.shader = MTOON_VERTEX_SHADER_HANDLE;
+        descriptor.vertex.shader = self.vertex_shader.clone();
         if let Some(fragment) = descriptor.fragment.as_mut() {
-            fragment.shader = MTOON_FRAGMENT_SHADER_HANDLE;
+            fragment.shader = self.fragment_shader.clone();
         }
 
         if descriptor.layout.len() <= 3 {

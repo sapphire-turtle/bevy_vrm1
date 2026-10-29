@@ -7,7 +7,7 @@ use crate::prelude::*;
 use crate::vrm::gltf::materials::VrmcMaterialsExtensitions;
 use crate::vrm::mtoon::outline_pass::MToonOutlinePlugin;
 use crate::vrm::mtoon::setup::MToonMaterialSetupPlugin;
-use bevy::asset::{AssetId, load_internal_asset, uuid_handle};
+use bevy::asset::{AssetId, AssetPath, embedded_asset, embedded_path};
 use bevy::prelude::*;
 use std::collections::HashMap;
 
@@ -15,12 +15,15 @@ pub mod prelude {
     pub use crate::vrm::mtoon::{MtoonMaterialPlugin, VrmcMaterialRegistry, material::prelude::*};
 }
 
-const MTOON_FRAGMENT_SHADER_HANDLE: Handle<Shader> =
-    uuid_handle!("9a96eff2-1676-1dc0-9abc-2fd5e7134443");
-const MTOON_VERTEX_SHADER_HANDLE: Handle<Shader> =
-    uuid_handle!("f4041db8-c464-b84c-e3c9-e618527945a1");
-const MTOON_TYPES_SHADER_HANDLE: Handle<Shader> =
-    uuid_handle!("5d9302a3-6498-9d2a-fadb-842d01c87697");
+/// The embedded asset path of the `MToon` vertex shader.
+fn mtoon_vertex_shader_path() -> AssetPath<'static> {
+    AssetPath::from_path_buf(embedded_path!("mtoon_vertex.wesl")).with_source("embedded")
+}
+
+/// The embedded asset path of the `MToon` fragment shader.
+fn mtoon_fragment_shader_path() -> AssetPath<'static> {
+    AssetPath::from_path_buf(embedded_path!("mtoon_fragment.wesl")).with_source("embedded")
+}
 
 pub struct MtoonMaterialPlugin;
 
@@ -29,6 +32,13 @@ impl Plugin for MtoonMaterialPlugin {
         &self,
         app: &mut App,
     ) {
+        // Register the shaders before `MaterialPlugin`: it starts loading the
+        // material's vertex and fragment shaders while it is being built.
+        // `mtoon_types` is imported by the other two, so it stays loaded
+        // as a shader library (imported as `bevy_vrm1::vrm::mtoon_types`).
+        bevy::shader::load_shader_library!(app, "mtoon_types.wesl");
+        embedded_asset!(app, "mtoon_vertex.wesl");
+        embedded_asset!(app, "mtoon_fragment.wesl");
         app.register_type::<MToonMaterial>()
             .register_type::<MToonOutline>()
             .register_type::<VrmcMaterialRegistry>()
@@ -37,24 +47,6 @@ impl Plugin for MtoonMaterialPlugin {
             .register_type::<Shade>()
             .add_plugins(MaterialPlugin::<MToonMaterial>::default())
             .add_plugins((MToonMaterialSetupPlugin, MToonOutlinePlugin));
-        load_internal_asset!(
-            app,
-            MTOON_FRAGMENT_SHADER_HANDLE,
-            "mtoon_fragment.wgsl",
-            Shader::from_wgsl
-        );
-        load_internal_asset!(
-            app,
-            MTOON_TYPES_SHADER_HANDLE,
-            "mtoon_types.wgsl",
-            Shader::from_wgsl
-        );
-        load_internal_asset!(
-            app,
-            MTOON_VERTEX_SHADER_HANDLE,
-            "mtoon_vertex.wgsl",
-            Shader::from_wgsl
-        );
     }
 }
 

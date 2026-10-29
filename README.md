@@ -1,3 +1,6 @@
+> [!NOTE]
+> This is the [sapphire-turtle](https://github.com/sapphire-turtle) fork of [not-elm/bevy_vrm1](https://github.com/not-elm/bevy_vrm1), ported to bevy 0.20 on the `bevy-0.20` branch for sapphire-agent's desktop; drop it once upstream releases a bevy 0.20 version.
+
 # bevy_vrm1
 
 [![Crates.io](https://img.shields.io/crates/v/bevy_vrm1.svg)](https://crates.io/crates/bevy_vrm1)
@@ -120,6 +123,7 @@ The meshes are then assigned `RenderLayers` according to the model's `meshAnnota
 
 | bevy_vrm1 | bevy |
 | --------- | ---- |
+| fork branch `bevy-0.20` | 0.20 |
 | 0.8.0 ~   | 0.19 |
 | 0.5.0 ~   | 0.18 |
 | 0.4.0 ~   | 0.17 |

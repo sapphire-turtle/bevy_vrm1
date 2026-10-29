@@ -11,10 +11,11 @@ use crate::vrm::mtoon::{MToonMaterial, MToonMaterialKey};
 use bevy::core_pipeline::core_3d::main_transparent_pass_3d;
 use bevy::core_pipeline::{Core3d, Core3dSystems};
 use bevy::pbr::{
-    MaterialBindGroupAllocators, MaterialPipeline, MaterialPipelineKey, PreparedMaterial,
+    MaterialPipeline, MaterialPipelineKey, PreparedMaterial,
     RenderMeshInstanceFlags, ViewKeyCache, alpha_mode_pipeline_key, init_material_pipeline,
     queue_material_meshes,
 };
+use bevy::render::material_bind_groups::MaterialBindGroupAllocators;
 use bevy::render::sync_world::MainEntityHashMap;
 use bevy::render::view::RenderVisibilityRanges;
 use bevy::render::{GpuResourceAppExt, RenderStartup};
@@ -237,11 +238,13 @@ fn init_mtoon_outline_pipeline(
     mut commands: Commands,
     material_pipeline: Res<MaterialPipeline>,
     render_device: Res<bevy::render::renderer::RenderDevice>,
+    asset_server: Res<AssetServer>,
 ) {
     use bevy::render::render_resource::AsBindGroup;
     let material_layout = MToonMaterial::bind_group_layout_descriptor(&render_device);
-    commands.insert_resource(MToonOutlinePipeline {
-        base: material_pipeline.clone(),
+    commands.insert_resource(MToonOutlinePipeline::new(
+        material_pipeline.clone(),
         material_layout,
-    });
+        &asset_server,
+    ));
 }
